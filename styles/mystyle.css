@@ -1,0 +1,17 @@
+body {
+    margin: 0;
+}
+
+#splash-screen {
+    display: flex;
+    justify-content: center;
+}
+
+#game-screen {
+    display: none;
+    justify-content: center;
+}
+
+canvas {
+    border: 1px solid black;
+}
