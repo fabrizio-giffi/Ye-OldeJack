@@ -9,6 +9,8 @@ const gameScreen = document.querySelector("#game-screen")
 const hitBtn = document.querySelector("#hit")
 const standBtn = document.querySelector("#stand")
 
+const gameOverScreen = document.querySelector("#game-over-screen")
+
 const dealerHandUL = document.querySelector("#dealer-hand")
 const playerHandUL = document.querySelector("#player-hand")
 
@@ -132,7 +134,9 @@ class Game {
   // END Constructor
 
   // START Methods
-  
+
+    // // This function will sum the value of the cards in either hands and return it
+    // // to be shown next to the player's and the dealer's hands
     showScore(whoseGo) {
       whoseGo.score = whoseGo.Hand.reduce((acc, current) => acc + current.value, 0)
       if (whoseGo.score <= 21) {
@@ -143,8 +147,8 @@ class Game {
       }
     }
   
-    // This function takes either player's or bet total money and displays
-    // a pile of coin accordingly.
+    // // This function takes either player's or bet total money and displays
+    // // a pile of coin accordingly.
     showMoney(money) {
       if(money > 200) {
         this.moneyDisplay = 500;
@@ -174,11 +178,11 @@ class Game {
     }
 
     drawCard(whoseGo) {
-      // Picks a random card from the deck, puts it in either player's or dealer's hand array
-      // Every time a card is drawn the score is updated
+      // // Picks a random card from the deck, puts it in either player's or dealer's hand array
+      // // Every time a card is drawn the score is updated
       let randCard = this.cardsDeck[Math.floor(Math.random() * this.cardsDeck.length)];
 
-      // if the shuffle card is drawn, the deck is shuffled before drawing the next card
+      // // if the shuffle card is drawn, the deck is shuffled before drawing the next card
       if(randCard.name === "Shuffle Card") {
         this.cardsDeck.splice(this.cardsDeck.indexOf(randCard), 1);
         this.removedDeck.push(randCard)
@@ -186,14 +190,12 @@ class Game {
         this.removedDeck.forEach(card => this.cardsDeck.push(card))
       }
 
-      //Removing card from the deck and putting into hand array
+      // //Removing card from the deck and putting into hand array
       this.cardsDeck.splice(this.cardsDeck.indexOf(randCard), 1);
       whoseGo.Hand.push(randCard);
 
-      // TESTING without canDraw
       if(whoseGo.canDraw){
-
-      //Creating and appending new Img
+      // // Creating and appending new Img
       const newCardLI = document.createElement("li");
       const newImg = document.createElement("img");
       newImg.setAttribute("src", `${randCard.faceUp}`)
@@ -219,13 +221,27 @@ class Game {
     }
 
     gameOver() {
-
+      gameScreen.style.display = "none"
+      playerBtn.style.display = "none"
+      betScreen.style.display = "none"
+      hiddenGame.forEach(element => element.style.display = "none")
+      gameOverScreen.style.display = "flex"
+    }
+    gameWon() {
+      gameScreen.style.display = "none"
+      playerBtn.style.display = "none"
+      betScreen.style.display = "none"
+      hiddenGame.forEach(element => element.style.display = "none")
+      gameOverScreen.style.display = "flex"
     }
     
     playerBet() {
-      // if(this.player.Money === 0) {
-      //   gameOver()
-      // }
+      if(this.player.Money === 0) {
+        this.gameOver()
+      }
+      if(this.dealer.Money <= 0) {
+        this.gameWon()
+      }
       this.player.Bet = 0
       splashScreen.style.display = "none";
       betScreen.style.display = "flex"
@@ -238,7 +254,12 @@ class Game {
       const betOutput = document.querySelector("#bet-output")
       const betBtn = document.querySelector("#bet-btn")
       
-      betInput.setAttribute("max", this.player.Money)
+      if(this.player.Money < this.dealer.Money){
+        betInput.setAttribute("max", this.player.Money)
+      }
+      else {
+        betInput.setAttribute("max", this.dealer.Money)
+      }
       betOutput.innerText = betInput.value
       
       // Event listener to display range value
@@ -292,13 +313,13 @@ class Game {
       if (this.showScore(this.player) === 21 && this.showScore(this.dealer) < 21) {
         firstCardImg.setAttribute("src", `${this.dealer.Hand[0].faceUp}`)
         dealerScoreAside.style.display = "flex"
-        this.player.Money += Number(this.totalBet) * 1.5
-        this.dealer.Money -= Number(this.totalBet) / 0.5
+        this.player.Money += Number(this.totalBet) + Number(this.player.Bet) / 2
+        this.dealer.Money -= Number(this.player.Bet) / 2
         betMiddleAside.parentNode.style.display = "none"
         dialog.style.display = "block"
         dialogText.innerText = 
 `Blackjack!
-You win ${this.totalBet * 1.5}!`
+You win ${Number(this.totalBet) + Number(this.player.Bet) / 2}!`
         dialogBtn.innerText = "Cool!"
       }
       else if(this.showScore(this.dealer) === 21 && this.showScore(this.player) < 21){
@@ -340,55 +361,56 @@ Bets are returned.`
       setTimeout(() => {
 
     // // The function will check whose score is higher
-        if(this.showScore(this.player) > this.showScore(this.dealer)) {
-          this.player.Money += Number(this.totalBet)
-          betMiddleAside.parentNode.style.display = "none"
-          dialog.style.display = "block"
-          dialogText.innerText = 
-  `You beat the dealer!
-  You win ${this.totalBet}!`
-          dialogBtn.innerText = "Cool!"
-          }
-        else if(this.showScore(this.player) < this.showScore(this.dealer)) {
-          this.dealer.Money += Number(this.totalBet)
-          betMiddleAside.parentNode.style.display = "none"
-          dialog.style.display = "block"
-          dialogText.innerText = 
-  `You lost!
-  Dealer takes the plate!`
-          dialogBtn.innerText = "Damn."
-          }
-        else if(this.showScore(this.player) === this.showScore(this.dealer)) {
-          this.player.Money += this.totalBet / 2
-          this.dealer.Money += this.totalBet / 2
-          betMiddleAside.parentNode.style.display = "none"
-          dialog.style.display = "block"
-          dialogText.innerText = 
-  `A tie!
-  Bets are returned.`
-          dialogBtn.innerText = "¯\_(ツ)_/¯"
-          }
-
+    if (!this.checkBust(this.player) && !this.checkBust(this.dealer)){
+      if(this.player.score > this.dealer.score) {
+        this.player.Money += Number(this.totalBet)
+        betMiddleAside.parentNode.style.display = "none"
+        dialog.style.display = "block"
+        dialogText.innerText = 
+`You beat the dealer!
+You win ${this.totalBet}!`
+        dialogBtn.innerText = "Cool!"
+        }
+      else if(this.player.score < this.dealer.score) {
+        this.dealer.Money += Number(this.totalBet)
+        betMiddleAside.parentNode.style.display = "none"
+        dialog.style.display = "block"
+        dialogText.innerText = 
+`You lost!
+Dealer takes the plate!`
+        dialogBtn.innerText = "Damn."
+        }
+      else if(this.player.score === this.dealer.score) {
+        this.player.Money += this.totalBet / 2
+        this.dealer.Money += this.totalBet / 2
+        betMiddleAside.parentNode.style.display = "none"
+        dialog.style.display = "block"
+        dialogText.innerText = 
+`A tie!
+Bets are returned.`
+        dialogBtn.innerText = "¯\_(ツ)_/¯"
+        }
+    }
     // // In case of bust we check if the other party is also bust.
     // // There are three possibilities: only player bust, only dealer bust or double bust
-          else if(!this.checkBust(this.player) && this.checkBust(this.dealer)) {
-            this.player.Money += Number(this.totalBet)
-            betMiddleAside.parentNode.style.display = "none"
-            dialog.style.display = "block"
-            dialogText.innerText = 
-  `Dealer is bust!
-  You win ${this.totalBet}!`
-          dialogBtn.innerText = "Cool!"
-          }
-        else if(this.checkBust(this.player) && !this.checkBust(this.dealer)) {
-          this.dealer.Money += Number(this.totalBet)
-          betMiddleAside.parentNode.style.display = "none"
-          dialog.style.display = "block"
-          dialogText.innerText = 
-  `Bust!
-  Dealer takes the plate!`
-          dialogBtn.innerText = "Damn."
-          }
+    else if(!this.checkBust(this.player) && this.checkBust(this.dealer)) {
+      this.player.Money += Number(this.totalBet)
+      betMiddleAside.parentNode.style.display = "none"
+      dialog.style.display = "block"
+      dialogText.innerText = 
+`Dealer is bust!
+You win ${this.totalBet}!`
+        dialogBtn.innerText = "Cool!"
+        }
+    else if(this.checkBust(this.player) && !this.checkBust(this.dealer)) {
+      this.dealer.Money += Number(this.totalBet)
+      betMiddleAside.parentNode.style.display = "none"
+      dialog.style.display = "block"
+      dialogText.innerText = 
+`Bust!
+Dealer takes the plate!`
+        dialogBtn.innerText = "Damn."
+        }
 
     // // In case of a double bust we check whose bust is "worse".
     // // This scenario leads to 3 different states: player win, dealer win or tie.

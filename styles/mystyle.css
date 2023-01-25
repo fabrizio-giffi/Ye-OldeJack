@@ -6,6 +6,7 @@ body {
     background-color: black;
 }
 figure {
+    z-index: 9;
     padding: 5px;
     gap: 10px;
     position: absolute;
@@ -83,6 +84,10 @@ aside, label, dialog {
     justify-content: center;
     align-items: center;
     gap: 10%;
+}
+
+#game-over-screen {
+    display: none;
 }
 
 #bet-money-aside {
