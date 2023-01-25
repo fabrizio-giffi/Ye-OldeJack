@@ -11,14 +11,19 @@ const standBtn = document.querySelector("#stand")
 const dealerHandUL = document.querySelector("#dealer-hand")
 const playerHandUL = document.querySelector("#player-hand")
 
-const playerScoreAside = document.querySelector("#player-score-aside")
-const playerScoreValue = playerScoreAside.querySelector("span")
+const playerScoreValue = document.querySelector("#player-score-aside span")
+
+const dealerScoreAside = document.querySelector("#dealer-score-aside")
+const dealerScoreValue = document.querySelector("#dealer-score-aside span")
+dealerScoreAside.style.display = "none"
 
 const betMoneyAside = document.querySelector("#bet-money-aside")
 const betMoneyPile = document.querySelector("#bet-money-pile")
 
 const moneyPlayerAside = document.querySelector("#money-player-aside")
 const moneyPlayerImg = document.querySelector("#money-player-img")
+const moneyPlayerCtn = document.querySelector("#money-player-ctn")
+moneyPlayerCtn.style.visibility = "hidden"
 
 const hiddenGame = document.querySelectorAll(".ctnHidden")
 const betMiddleAside = document.querySelector("#bet-middle-aside")
@@ -26,6 +31,10 @@ const betMiddleImg = document.querySelector("#bet-middle-img")
 
 const playerBtn = document.querySelector("#btnHidden")
 
+// Manipulating the dialog tag
+const dialog = document.querySelector("dialog")
+const dialogText = dialog.querySelector("p")
+const dialogBtn = dialog.querySelector("button")
 
 // Full deck of cards - 52 cards - 4 Suits
 // Hearts, Diamons, Clubs, Spades
@@ -85,6 +94,7 @@ class Game {
       {name: "Jack of Spades", value: 10, faceUp: "./images/playing-cards/card-spades-11.png", faceDown: "./images/playing-cards/card-back1.png"},
       {name: "Queen of Spades", value: 10, faceUp: "./images/playing-cards/card-spades-12.png", faceDown: "./images/playing-cards/card-back1.png"},
       {name: "King of Spades", value: 10, faceUp: "./images/playing-cards/card-spades-13.png", faceDown: "./images/playing-cards/card-back1.png"},
+      {name: "Shuffle Card"}
       ]
   
       this.removedDeck = []
@@ -117,9 +127,18 @@ class Game {
 
     showScore(hand) {
       let score = hand.reduce((acc, current) => acc + current.value, 0)
-      return score
+      if (score <= 21) {
+        return score
+      }
+      else if (score > 21) {
+        this.player.canDraw = false
+        this.player.Go = false
+        return score, "Bust!"
+      }
     }
 
+    // This function takes either player's or bet total money and displays
+    // a pile of coin accordingly.
     showMoney(money) {
       if(money > 200) {
         this.moneyDisplay = 500;
@@ -139,52 +158,51 @@ class Game {
       return "./images/assets/"+this.moneyDisplay+".png"
     }
 
-    drawCard() {
-      // Picks a random card in the deck, puts it in the player hand array and removes it from the deck until shuffled.
-      const randCard = this.cardsDeck[Math.floor(Math.random() * this.cardsDeck.length)];
-      this.cardsDeck.splice(this.cardsDeck.indexOf(randCard), 1);
-      this.removedDeck.push(randCard)
-      if(this.player.Go && this.player.canDraw){
-        this.player.Hand.push(randCard);
-        const newCardLI = document.createElement("li");
-        const newImg = document.createElement("img");
-        newImg.setAttribute("src", `${randCard.faceUp}`);
-        playerHandUL.appendChild(newCardLI);
-        newCardLI.appendChild(newImg);
-        this.player.cardsCount += 1;
+    drawCard(whoseGo) {
+      // Picks a random card from the deck, puts it in either player's or dealer's hand array
+      // Every time a card is drawn the score is updated
+      let randCard = this.cardsDeck[Math.floor(Math.random() * this.cardsDeck.length)];
+
+      // if the shuffle card is drawn, the deck is shuffled before drawing the next card
+      if(randCard.name === "Shuffle Card") {
+        this.cardsDeck.splice(this.cardsDeck.indexOf(randCard), 1);
+        this.removedDeck.push(randCard)
+        randCard = this.cardsDeck[Math.floor(Math.random() * this.cardsDeck.length)]
+        this.removedDeck.forEach(card => this.cardsDeck.push(card))
       }
-      else if(!this.player.Go && this.dealer.canDraw) {
-        this.dealer.Hand.push(randCard);
+
+      this.cardsDeck.splice(this.cardsDeck.indexOf(randCard), 1);
+
+      if(whoseGo.canDraw){
+        whoseGo.Hand.push(randCard);
         const newCardLI = document.createElement("li");
         const newImg = document.createElement("img");
-        dealerHandUL.appendChild(newCardLI);
-        if(this.dealer.cardsCount === 0) {
-          newImg.setAttribute("src", `${randCard.faceDown}`)
+        newImg.setAttribute("src", `${randCard.faceUp}`)
+        newCardLI.appendChild(newImg);
+        
+        if(this.player.Go){
+          playerHandUL.appendChild(newCardLI);
+          playerScoreValue.innerText = this.showScore(whoseGo.Hand)
         }
         else {
-          newImg.setAttribute("src", `${randCard.faceUp}`)
+          if(whoseGo.cardsCount === 0) {
+            // Dealer's first card will be dealt face down
+            newImg.setAttribute("src", `${randCard.faceDown}`)
+            newImg.setAttribute("id", "face-down")
+          }
+          dealerHandUL.appendChild(newCardLI);
+          dealerScoreValue.innerText = this.showScore(whoseGo.Hand)
         }
-        newCardLI.appendChild(newImg);
-        this.dealer.cardsCount += 1
-      }
-
-      playerScoreValue.innerText = this.showScore(this.player.Hand)
-      return randCard
-    }
-
-    checkBlackjack() {
-      if (this.showScore(this.player.Hand) === 21 && this.showScore(this.dealer.Hand) < 21) {
-        return "Blackjack! You won!"
-      }
-      else if(this.showScore(this.dealer.Hand) === 21 && this.showScore(this.player.Hand) < 21){
-        return "Blackjack! The dealer wins!"
-      }
-      else if(this.showScore(this.player.Hand) === 21 && this.showScore(this.player.Hand) === this.showScore(this.dealer.Hand)) {
-        return "What are the odds! A Blackjack tie!"
+        whoseGo.cardsCount += 1;
       }
     }
+
     
     playerBet() {
+      this.player.Bet = 0
+      this.dealer.Bet = 0
+      splashScreen.style.display = "none";
+      betScreen.style.display = "flex"
       betMoneyPile.setAttribute("src", this.showMoney(this.player.Money))
       betMoneyAside.firstChild.innerText = "Your money: " + this.player.Money + "¢"
 
@@ -194,7 +212,7 @@ class Game {
       
       betInput.setAttribute("max", this.player.Money)
       betOutput.innerText = betInput.value
-
+      
       // Event listener to display range value
       betInput.addEventListener("input", (event) => {
         betOutput.innerText = event.target.value
@@ -205,54 +223,119 @@ class Game {
         this.player.Bet = betInput.value
         this.dealer.Bet = this.player.Bet
         this.totalBet = Number(this.player.Bet) + Number(this.dealer.Bet)
-
+        moneyPlayerAside.firstChild.innerText = this.player.Money + "¢"
+        moneyPlayerImg.setAttribute("src", this.showMoney(this.player.Money))
         betScreen.style.display = "none"
         gameScreen.style.display = "flex"
         playerBtn.style.display = "flex"
-        this.playerTurn()
+        this.oneRound()
       }
     }
 
-    playerTurn() {
-      let delay = 300
+    endRound() {
+      // Cards in each hands go into the remove pile
+      // Hands are cleared, variable are restarted to default
+      this.player.Hand.forEach(card => this.removedDeck.push(card))
+      this.dealer.Hand.forEach(card => this.removedDeck.push(card))
+      this.player.Hand.splice(0, this.player.Hand.length)
+      this.dealer.Hand.splice(0, this.dealer.Hand.length)
+      while (playerHandUL.firstChild) {
+        playerHandUL.removeChild(playerHandUL.lastChild)
+      }
+      while (dealerHandUL.firstChild) {
+        dealerHandUL.removeChild(dealerHandUL.lastChild)
+      }
+      this.player.cardsCount = 0
+      this.dealer.cardsCount = 0
+    }
+    
+    checkBlackjack() {
+      const firstCardImg = document.querySelector("#face-down")
+      if (this.showScore(this.player.Hand) === 21 && this.showScore(this.dealer.Hand) < 21) {
+        firstCardImg.setAttribute("src", `${this.dealer.Hand[0].faceUp}`)
+        this.player.Money += this.totalBet * 1.5
+        betMiddleAside.parentNode.style.display = "none"
+        dialog.style.display = "block"
+        dialogText.innerText = 
+`Blackjack!
+You won ${this.totalBet * 1.5}!`
+        dialogBtn.innerText = "Cool!"
+      }
+      else if(this.showScore(this.dealer.Hand) === 21 && this.showScore(this.player.Hand) < 21){
+        firstCardImg.setAttribute("src", `${this.dealer.Hand[0].faceUp}`)
+        this.dealer.Money += this.totalBet
+        betMiddleAside.parentNode.style.display = "none"
+        dialog.style.display = "block"
+        dialogText.innerText = 
+`Blackjack!
+Dealer takes the plate!`
+        dialogBtn.innerText = "NOOOO"
+      }
+      else if(this.showScore(this.player.Hand) === 21 && this.showScore(this.player.Hand) === this.showScore(this.dealer.Hand)) {
+        firstCardImg.setAttribute("src", `${this.dealer.Hand[0].faceUp}`)
+        this.player.Money += this.player.Bet
+        this.dealer.Money += this.dealer.Bet
+        betMiddleAside.parentNode.style.display = "none"
+        dialog.style.display = "block"
+        dialogText.innerText =
+`What are the odds!
+A Blackjack tie!
+Bets are returned.`
+        dialogBtn.innerText = "¯\_(ツ)_/¯"
+      }
+      dialogBtn.onclick = () => {
+        dialog.style.display = "none"
+        this.endRound()
+        this.playerBet()
+      }
+    }
+
+    dealerGo() {
+      const firstCardImg = document.querySelector("#face-down")
+
+      firstCardImg.setAttribute("src", `${this.dealer.Hand[0].faceUp}`)
+      if(this.showScore(this.dealer.Hand) <= 17) {
+        // setTimeout(() => {
+        this.drawCard(this.dealer)
+        // }, 300);
+      }
+    }
+
+
+    oneRound() {
+      this.player.Go = true
       setTimeout(() => {
-        this.drawCard()
-      }, delay);
+        this.drawCard(this.player)
+      }, 300);
       setTimeout(() => {
-        this.drawCard()
+        this.drawCard(this.player)
         this.player.Go = false
-      }, delay*2);
+      }, 600);
       setTimeout(() => {
-        this.drawCard()
-      }, delay*3);
+        this.drawCard(this.dealer)
+      }, 900);
       setTimeout(() => {
-        this.drawCard()
+        this.drawCard(this.dealer)
         this.player.Go = true
-      }, delay*4);
+      }, 1200);
       setTimeout(() => {
         hiddenGame.forEach(element => element.style.display = "flex" )
-        console.log(moneyPlayerAside)
-        moneyPlayerAside.firstChild.innerText = this.player.Money + "¢"
-        moneyPlayerImg.setAttribute("src", this.showMoney(this.player.Money))
+        moneyPlayerCtn.style.visibility = "visible"
         betMiddleAside.firstChild.innerText = "Total bet: " + (Number(this.player.Bet) + Number(this.dealer.Bet)) + "¢"
         betMiddleImg.setAttribute("src", this.showMoney(this.totalBet))
         this.checkBlackjack()
-      }, delay*5);
+      }, 1500);
 
-
-      // TESTING
+      hitBtn.onclick = () => {
+        this.drawCard(this.player);
+      }
       standBtn.onclick = () => {
         this.player.Go = false
+        this.dealerGo()
       }
-      hitBtn.onclick = () => {
-        this.drawCard();
-        console.log("clicking")
-      }
+      
     }
 
-    shuffleDeck() {
-      this.removedDeck.forEach(card => this.cardsDeck.push(card))
-    }
 
     startGame() {
     // TEMPORARY - BACKLOG ADD A STARTING SCREEN WITH STORY?
@@ -265,8 +348,6 @@ class Game {
 
 window.onload = () => {
     startBtn.onclick = () => {
-      splashScreen.style.display = "none";
-      betScreen.style.display = "flex"
       const newGame = new Game
       newGame.startGame();
     };

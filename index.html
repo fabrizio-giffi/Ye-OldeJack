@@ -13,24 +13,24 @@
 
     <!-- Splash screen -->
 
-    <section id="splash-screen" class="ctn">
-        <img src="./images/assets/splash.jpeg" alt="Background Tavern">
-        <img src="./images/assets/logo.png" alt="Ye OldeJack logo"/>
-        <div class="ctn d-flex flex-column">
-            <button id="start-game-btn" class="btn btn-dark mb-3">START GAME</button>
-            <button class="btn btn-dark">YE OLDEJACK RULES</button>
+    <section id="splash-screen">
+        <img src="./images/assets/splash.png" alt="Background Tavern">
+        <img class="mb-5" id="logo" src="./images/assets/logo.png" alt="Ye OldeJack logo"/>
+        <div class="d-flex flex-column">
+            <button id="start-game-btn" class="btn btn-dark btn-lg mb-3">START GAME</button>
+            <button class="btn btn-dark btn-lg">YE OLDEJACK RULES</button>
         </div>
     </section>
 
     <!-- Bet screen  -->
 
     <section id="bet-screen" class="game-started">
-        <div id="bet-ctn" class="ctn d-flex flex-column align-items-center">
+        <div id="bet-ctn" class="d-flex flex-column align-items-center">
             <label for="bet-input">Place your bet! <output id="bet-output"></output></label>
             <input type="range" id="bet-input" step="1" value="1" min="1"/>
-            <button class="btn btn-block col-12 btn-warning" id="bet-btn">Bet</button>
+            <button class="btn btn-block btn-warning" id="bet-btn">Bet</button>
         </div>
-        <div class="ctn d-flex flex-column align-items-center mt-5">
+        <div class="d-flex flex-column align-items-center mt-5">
             <aside id="bet-money-aside"><span></span></aside>
             <img id="bet-money-pile" class="money-display mt-4" src="" alt="Coin pile"/>
         </div>
@@ -38,30 +38,37 @@
     
     <!-- Game screen -->
 
-    <section id="game-screen" class="game-started flex-column">
-        <div class="ctn">
-            <ul class ="list-unstyled d-flex" id="dealer-hand">
-            </ul>
+    <section id="game-screen" class="game-started p-5 flex-row">
+        <div id="card-board" class="d-flex flex-column">
+            <div id="dealer-cards" class="col-12 d-flex justify-content-center align-items-center">
+                <ul class ="list-unstyled d-flex" id="dealer-hand"></ul>
+                <aside class="m-3" id="dealer-score-aside">Dealer's hand:<span></span></aside>
+            </div>
+            <div class="ctnHidden justify-content-center align-items-center">
+                <img id="bet-middle-img" class="money-display m-3" src="" alt="Bet money">
+                <aside id="bet-middle-aside"><span></span></aside>
+            </div>
+            <div id="player-cards" class="d-flex flex-row justify-content-center align-items-center">
+                <ul class ="list-unstyled d-flex" id="player-hand"></ul>
+                <aside class="ctnHidden m-3" id="player-score-aside">Your hand:<span></span></aside>
+            </div>
         </div>
-        <div class="ctnHidden">
-            <img id="bet-middle-img" class="money-display" src="" alt="Bet money">
-            <aside id="bet-middle-aside"><span></span></aside>
+        <div id="btnHidden" class="justify-content-center flex-column">
+            <button class="btn btn-success btn-block col-12 " id="hit">Hit</button>
+            <button class="btn btn-secondary btn-block col-12" id="stand">Stand</button>
         </div>
-        <div class="ctn">
-            <ul class ="list-unstyled d-flex" id="player-hand"></ul>
-            <aside class="ctnHidden" id="player-score-aside">Your hand: <span></span></aside>
-        </div>
-        <div class="ctn ctnHidden flex-column">
+        <div id="money-player-ctn" class="flex-column">
             <img id="money-player-img" class="money-display" src="" alt="Coin pile"/>
             <aside id="money-player-aside"><span></span></aside>
         </div>
-
     </section>
-    <!-- Game buttons -->
-    <div id="btnHidden" class="ctn justify-content-center flex-row">
-        <button class="btn btn-success btn-block col-12 " id="hit">Hit</button>
-        <button class="btn btn-secondary btn-block col-12" id="stand">Stand</button>
-    </div>
+    <!-- Dialog box -->
+    <dialog open>
+        <p></p>
+        <form method="dialog">
+            <button class="btn btn-dark btn-lg">Placeholder</button>
+        </form>
+    </dialog>
     
     <script src="./index.js"></script>
 </body>
