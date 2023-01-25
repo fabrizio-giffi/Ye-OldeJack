@@ -14,6 +14,14 @@
     <!-- Splash screen -->
 
     <section id="splash-screen">
+
+    <!-- Audio embed -->
+
+        <figure class="d-flex align-items-center">
+            <audio loop controls src="./media/tavern-loop.mp3"></audio>
+            <figcaption>Song credits: Alexander Nakarada</figcaption>
+        </figure>
+
         <img src="./images/assets/splash.png" alt="Background Tavern">
         <img class="mb-5" id="logo" src="./images/assets/logo.png" alt="Ye OldeJack logo"/>
         <div class="d-flex flex-column">
@@ -25,14 +33,18 @@
     <!-- Bet screen  -->
 
     <section id="bet-screen" class="game-started">
+        <div class="d-flex flex-column align-items-center">
+            <img id="bet-dealer-pile" class="money-display mt-4" src="" alt="Coin pile"/>
+            <aside id="bet-dealer-aside"><span></span></aside>
+        </div>
         <div id="bet-ctn" class="d-flex flex-column align-items-center">
             <label for="bet-input">Place your bet! <output id="bet-output"></output></label>
             <input type="range" id="bet-input" step="1" value="1" min="1"/>
             <button class="btn btn-block btn-warning" id="bet-btn">Bet</button>
         </div>
         <div class="d-flex flex-column align-items-center mt-5">
-            <aside id="bet-money-aside"><span></span></aside>
             <img id="bet-money-pile" class="money-display mt-4" src="" alt="Coin pile"/>
+            <aside id="bet-money-aside"><span></span></aside>
         </div>
     </section>
     
@@ -57,10 +69,17 @@
             <button class="btn btn-success btn-block col-12 " id="hit">Hit</button>
             <button class="btn btn-secondary btn-block col-12" id="stand">Stand</button>
         </div>
-        <div id="money-player-ctn" class="flex-column">
-            <img id="money-player-img" class="money-display" src="" alt="Coin pile"/>
-            <aside id="money-player-aside"><span></span></aside>
+        <div id="money-column">
+            <div id="money-dealer-ctn" class="flex-column">
+                <img id="money-dealer-img" class="money-display" src="" alt="Coin pile"/>
+                <aside id="money-dealer-aside"><span></span></aside>
+            </div>
+            <div id="money-player-ctn" class="flex-column">
+                <img id="money-player-img" class="money-display" src="" alt="Coin pile"/>
+                <aside id="money-player-aside"><span></span></aside>
+            </div>
         </div>
+        
     </section>
     <!-- Dialog box -->
     <dialog open>
@@ -69,6 +88,11 @@
             <button class="btn btn-dark btn-lg">Placeholder</button>
         </form>
     </dialog>
+
+
+    <section>
+
+    </section>
     
     <script src="./index.js"></script>
 </body>

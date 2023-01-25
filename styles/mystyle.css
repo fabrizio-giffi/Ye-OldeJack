@@ -5,6 +5,17 @@ body {
     align-items: center;
     background-color: black;
 }
+figure {
+    padding: 5px;
+    gap: 10px;
+    position: absolute;
+    top: 0;
+    width: 100vw;
+    color: white;
+}
+audio {
+    width: 80px;
+}
 
 #splash-screen {
     position: absolute;
@@ -71,6 +82,7 @@ aside, label, dialog {
     display: none;
     justify-content: center;
     align-items: center;
+    gap: 10%;
 }
 
 #bet-money-aside {
@@ -92,8 +104,11 @@ aside, label, dialog {
     justify-self: flex-end;
 }
 
-#money-player-ctn {
-    align-self: flex-end;
+#money-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
 }
 
 #dividerHidden {

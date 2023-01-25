@@ -1,4 +1,5 @@
 // DOM elements
+const audioLoop = document.querySelector("audio")
 const splashScreen = document.querySelector("#splash-screen")
 const startBtn = document.querySelector("#start-game-btn")
 
@@ -11,6 +12,7 @@ const standBtn = document.querySelector("#stand")
 const dealerHandUL = document.querySelector("#dealer-hand")
 const playerHandUL = document.querySelector("#player-hand")
 
+const playerScoreAside = document.querySelector("#player-score-aside")
 const playerScoreValue = document.querySelector("#player-score-aside span")
 
 const dealerScoreAside = document.querySelector("#dealer-score-aside")
@@ -19,11 +21,18 @@ dealerScoreAside.style.display = "none"
 
 const betMoneyAside = document.querySelector("#bet-money-aside")
 const betMoneyPile = document.querySelector("#bet-money-pile")
+const betDealerAside = document.querySelector("#bet-dealer-aside")
+const betDealerPile = document.querySelector("#bet-dealer-pile")
 
 const moneyPlayerAside = document.querySelector("#money-player-aside")
 const moneyPlayerImg = document.querySelector("#money-player-img")
 const moneyPlayerCtn = document.querySelector("#money-player-ctn")
 moneyPlayerCtn.style.visibility = "hidden"
+
+const moneyDealerAside = document.querySelector("#money-dealer-aside")
+const moneyDealerImg = document.querySelector("#money-dealer-img")
+const moneyDealerCtn = document.querySelector("#money-dealer-ctn")
+moneyDealerCtn.style.visibility = "hidden"
 
 const hiddenGame = document.querySelectorAll(".ctnHidden")
 const betMiddleAside = document.querySelector("#bet-middle-aside")
@@ -108,35 +117,32 @@ class Game {
         cardsCount: 0,
         Go : true,
         canDraw : true,
+        score : 0,
       };
   
       this.dealer = {
         Hand : [],
-        Bet : 0,
         Money : 2500,
         cardsCount: 0,
         canDraw : true,
+        score : 0,
       }
-
-      // Initializing some variables
-      this.isBlackjack = false
   }
+
   // END Constructor
 
   // START Methods
-
-    showScore(hand) {
-      let score = hand.reduce((acc, current) => acc + current.value, 0)
-      if (score <= 21) {
-        return score
+  
+    showScore(whoseGo) {
+      whoseGo.score = whoseGo.Hand.reduce((acc, current) => acc + current.value, 0)
+      if (whoseGo.score <= 21) {
+        return whoseGo.score
       }
-      else if (score > 21) {
-        this.player.canDraw = false
-        this.player.Go = false
-        return score, "Bust!"
+      else if (whoseGo.score > 21) {
+        return "Bust!"
       }
     }
-
+  
     // This function takes either player's or bet total money and displays
     // a pile of coin accordingly.
     showMoney(money) {
@@ -158,6 +164,15 @@ class Game {
       return "./images/assets/"+this.moneyDisplay+".png"
     }
 
+
+    checkBust(whoseGo) {
+      if(whoseGo.score > 21) {
+        whoseGo.Go = false
+        whoseGo.canDraw = false
+        return true
+      }
+    }
+
     drawCard(whoseGo) {
       // Picks a random card from the deck, puts it in either player's or dealer's hand array
       // Every time a card is drawn the score is updated
@@ -171,40 +186,53 @@ class Game {
         this.removedDeck.forEach(card => this.cardsDeck.push(card))
       }
 
+      //Removing card from the deck and putting into hand array
       this.cardsDeck.splice(this.cardsDeck.indexOf(randCard), 1);
+      whoseGo.Hand.push(randCard);
 
+      // TESTING without canDraw
       if(whoseGo.canDraw){
-        whoseGo.Hand.push(randCard);
-        const newCardLI = document.createElement("li");
-        const newImg = document.createElement("img");
-        newImg.setAttribute("src", `${randCard.faceUp}`)
-        newCardLI.appendChild(newImg);
-        
-        if(this.player.Go){
-          playerHandUL.appendChild(newCardLI);
-          playerScoreValue.innerText = this.showScore(whoseGo.Hand)
+
+      //Creating and appending new Img
+      const newCardLI = document.createElement("li");
+      const newImg = document.createElement("img");
+      newImg.setAttribute("src", `${randCard.faceUp}`)
+      newCardLI.appendChild(newImg);
+      
+      if(this.player.Go){
+        playerHandUL.appendChild(newCardLI);
+        playerScoreValue.innerText = this.showScore(whoseGo)
+        // Implement check bust function
+      }
+      else {
+        if(whoseGo.cardsCount === 0) {
+          // Dealer's first card will be dealt face down
+          newImg.setAttribute("src", `${randCard.faceDown}`)
+          newImg.setAttribute("id", "face-down")
         }
-        else {
-          if(whoseGo.cardsCount === 0) {
-            // Dealer's first card will be dealt face down
-            newImg.setAttribute("src", `${randCard.faceDown}`)
-            newImg.setAttribute("id", "face-down")
-          }
-          dealerHandUL.appendChild(newCardLI);
-          dealerScoreValue.innerText = this.showScore(whoseGo.Hand)
-        }
-        whoseGo.cardsCount += 1;
+        dealerHandUL.appendChild(newCardLI);
+        dealerScoreValue.innerText = this.showScore(whoseGo)
+        // Implement check bust function
+      }
+      whoseGo.cardsCount += 1;
       }
     }
 
+    gameOver() {
+
+    }
     
     playerBet() {
+      // if(this.player.Money === 0) {
+      //   gameOver()
+      // }
       this.player.Bet = 0
-      this.dealer.Bet = 0
       splashScreen.style.display = "none";
       betScreen.style.display = "flex"
       betMoneyPile.setAttribute("src", this.showMoney(this.player.Money))
       betMoneyAside.firstChild.innerText = "Your money: " + this.player.Money + "¢"
+      betDealerPile.setAttribute("src", this.showMoney(this.dealer.Money))
+      betDealerAside.firstChild.innerText = "Dealer's money: " + this.dealer.Money + "¢"
 
       const betInput = document.querySelector("#bet-input")
       const betOutput = document.querySelector("#bet-output")
@@ -220,11 +248,13 @@ class Game {
       // Event listener to place the bet
       betBtn.onclick = () => {
         this.player.Money -= betInput.value
+        this.dealer.Money -= betInput.value
         this.player.Bet = betInput.value
-        this.dealer.Bet = this.player.Bet
-        this.totalBet = Number(this.player.Bet) + Number(this.dealer.Bet)
+        this.totalBet = Number(this.player.Bet) * 2
         moneyPlayerAside.firstChild.innerText = this.player.Money + "¢"
+        moneyDealerAside.firstChild.innerText = this.dealer.Money + "¢"
         moneyPlayerImg.setAttribute("src", this.showMoney(this.player.Money))
+        moneyDealerImg.setAttribute("src", this.showMoney(this.dealer.Money))
         betScreen.style.display = "none"
         gameScreen.style.display = "flex"
         playerBtn.style.display = "flex"
@@ -233,8 +263,8 @@ class Game {
     }
 
     endRound() {
-      // Cards in each hands go into the remove pile
-      // Hands are cleared, variable are restarted to default
+      // // Cards in each hands go into the remove pile
+      // // Hands are cleared, variable are restarted to default
       this.player.Hand.forEach(card => this.removedDeck.push(card))
       this.dealer.Hand.forEach(card => this.removedDeck.push(card))
       this.player.Hand.splice(0, this.player.Hand.length)
@@ -247,34 +277,46 @@ class Game {
       }
       this.player.cardsCount = 0
       this.dealer.cardsCount = 0
+      gameScreen.style.display = "none"
+      playerBtn.style.display = "none"
+      dealerScoreAside.style.display = "none"
+      hiddenGame.forEach(element => element.style.display = "none")
     }
     
     checkBlackjack() {
+
+    // // Blackjack or "Natural" is checked only at the beginning of player's go.
+    // // Although face down, we take into account dealer first card's value
+    // // In case of Blackjack on any side, the face down card is revealed and so is dealer's score
       const firstCardImg = document.querySelector("#face-down")
-      if (this.showScore(this.player.Hand) === 21 && this.showScore(this.dealer.Hand) < 21) {
+      if (this.showScore(this.player) === 21 && this.showScore(this.dealer) < 21) {
         firstCardImg.setAttribute("src", `${this.dealer.Hand[0].faceUp}`)
-        this.player.Money += this.totalBet * 1.5
+        dealerScoreAside.style.display = "flex"
+        this.player.Money += Number(this.totalBet) * 1.5
+        this.dealer.Money -= Number(this.totalBet) / 0.5
         betMiddleAside.parentNode.style.display = "none"
         dialog.style.display = "block"
         dialogText.innerText = 
 `Blackjack!
-You won ${this.totalBet * 1.5}!`
+You win ${this.totalBet * 1.5}!`
         dialogBtn.innerText = "Cool!"
       }
-      else if(this.showScore(this.dealer.Hand) === 21 && this.showScore(this.player.Hand) < 21){
+      else if(this.showScore(this.dealer) === 21 && this.showScore(this.player) < 21){
         firstCardImg.setAttribute("src", `${this.dealer.Hand[0].faceUp}`)
-        this.dealer.Money += this.totalBet
+        dealerScoreAside.style.display = "flex"
+        this.dealer.Money += Number(this.totalBet)
         betMiddleAside.parentNode.style.display = "none"
         dialog.style.display = "block"
         dialogText.innerText = 
 `Blackjack!
 Dealer takes the plate!`
-        dialogBtn.innerText = "NOOOO"
+        dialogBtn.innerText = "Noooo"
       }
-      else if(this.showScore(this.player.Hand) === 21 && this.showScore(this.player.Hand) === this.showScore(this.dealer.Hand)) {
+      else if(this.showScore(this.player) === 21 && this.showScore(this.dealer) === 21) {
         firstCardImg.setAttribute("src", `${this.dealer.Hand[0].faceUp}`)
-        this.player.Money += this.player.Bet
-        this.dealer.Money += this.dealer.Bet
+        dealerScoreAside.style.display = "flex"
+        this.player.Money += Number(this.player.Bet)
+        this.dealer.Money += Number(this.player.Bet)
         betMiddleAside.parentNode.style.display = "none"
         dialog.style.display = "block"
         dialogText.innerText =
@@ -283,6 +325,8 @@ A Blackjack tie!
 Bets are returned.`
         dialogBtn.innerText = "¯\_(ツ)_/¯"
       }
+
+    // The dialog button will run first the endRound function to reset everything to default
       dialogBtn.onclick = () => {
         dialog.style.display = "none"
         this.endRound()
@@ -290,20 +334,123 @@ Bets are returned.`
       }
     }
 
+    checkWinner() {
+    // // The checkWinner function will run at the end of dealer's go 
+    // // with a delay of 1500ms to make user experience better.
+      setTimeout(() => {
+
+    // // The function will check whose score is higher
+        if(this.showScore(this.player) > this.showScore(this.dealer)) {
+          this.player.Money += Number(this.totalBet)
+          betMiddleAside.parentNode.style.display = "none"
+          dialog.style.display = "block"
+          dialogText.innerText = 
+  `You beat the dealer!
+  You win ${this.totalBet}!`
+          dialogBtn.innerText = "Cool!"
+          }
+        else if(this.showScore(this.player) < this.showScore(this.dealer)) {
+          this.dealer.Money += Number(this.totalBet)
+          betMiddleAside.parentNode.style.display = "none"
+          dialog.style.display = "block"
+          dialogText.innerText = 
+  `You lost!
+  Dealer takes the plate!`
+          dialogBtn.innerText = "Damn."
+          }
+        else if(this.showScore(this.player) === this.showScore(this.dealer)) {
+          this.player.Money += this.totalBet / 2
+          this.dealer.Money += this.totalBet / 2
+          betMiddleAside.parentNode.style.display = "none"
+          dialog.style.display = "block"
+          dialogText.innerText = 
+  `A tie!
+  Bets are returned.`
+          dialogBtn.innerText = "¯\_(ツ)_/¯"
+          }
+
+    // // In case of bust we check if the other party is also bust.
+    // // There are three possibilities: only player bust, only dealer bust or double bust
+          else if(!this.checkBust(this.player) && this.checkBust(this.dealer)) {
+            this.player.Money += Number(this.totalBet)
+            betMiddleAside.parentNode.style.display = "none"
+            dialog.style.display = "block"
+            dialogText.innerText = 
+  `Dealer is bust!
+  You win ${this.totalBet}!`
+          dialogBtn.innerText = "Cool!"
+          }
+        else if(this.checkBust(this.player) && !this.checkBust(this.dealer)) {
+          this.dealer.Money += Number(this.totalBet)
+          betMiddleAside.parentNode.style.display = "none"
+          dialog.style.display = "block"
+          dialogText.innerText = 
+  `Bust!
+  Dealer takes the plate!`
+          dialogBtn.innerText = "Damn."
+          }
+
+    // // In case of a double bust we check whose bust is "worse".
+    // // This scenario leads to 3 different states: player win, dealer win or tie.
+        else if(this.checkBust(this.player) && this.checkBust(this.dealer)) {
+          if(this.player.score > this.dealer.score) {
+            this.dealer.Money += Number(this.totalBet)
+            betMiddleAside.parentNode.style.display = "none"
+            dialog.style.display = "block"
+            dialogText.innerText = 
+  `Bust!
+  Dealer takes the plate!`
+            dialogBtn.innerText = "Damn."
+          }
+          else if(this.player.score < this.dealer.score) {
+            this.player.Money += Number(this.totalBet)
+            betMiddleAside.parentNode.style.display = "none"
+            dialog.style.display = "block"
+            dialogText.innerText = 
+  `Dealer is bust!
+  You win ${this.totalBet}!`
+          dialogBtn.innerText = "Cool!"
+          }
+          else if(this.player.score === this.dealer.score) {
+            this.player.Money += this.totalBet / 2
+            this.dealer.Money += this.totalBet / 2
+            betMiddleAside.parentNode.style.display = "none"
+            dialog.style.display = "block"
+            dialogText.innerText = 
+  `A tie!
+  Bets are returned.`
+            dialogBtn.innerText = "¯\_(ツ)_/¯"
+          }
+        }
+
+    // // No matter the outcome, pressing the button on the dialog box would lead
+    // // straight back to the betting screen for the next round to begin.
+        dialogBtn.onclick = () => {
+          dialog.style.display = "none"
+          this.endRound()
+          this.playerBet()
+        }
+      }, 1500)
+  }
+
     dealerGo() {
       const firstCardImg = document.querySelector("#face-down")
 
       firstCardImg.setAttribute("src", `${this.dealer.Hand[0].faceUp}`)
-      if(this.showScore(this.dealer.Hand) <= 17) {
-        // setTimeout(() => {
+      dealerScoreAside.style.display = "flex"
+
+      while(this.showScore(this.dealer) <= 17) {
         this.drawCard(this.dealer)
-        // }, 300);
+        }
+        this.checkWinner()
       }
-    }
 
 
     oneRound() {
+      // // Taking variables back to default value for every new round
       this.player.Go = true
+      this.player.canDraw = true
+      this.dealer.canDraw = true
       setTimeout(() => {
         this.drawCard(this.player)
       }, 300);
@@ -321,32 +468,35 @@ Bets are returned.`
       setTimeout(() => {
         hiddenGame.forEach(element => element.style.display = "flex" )
         moneyPlayerCtn.style.visibility = "visible"
-        betMiddleAside.firstChild.innerText = "Total bet: " + (Number(this.player.Bet) + Number(this.dealer.Bet)) + "¢"
+        moneyDealerCtn.style.visibility = "visible"
+        betMiddleAside.firstChild.innerText = "Total bet: " + (Number(this.player.Bet) *2) + "¢"
         betMiddleImg.setAttribute("src", this.showMoney(this.totalBet))
         this.checkBlackjack()
       }, 1500);
 
       hitBtn.onclick = () => {
         this.drawCard(this.player);
+        if(this.checkBust(this.player)) {
+          this.dealerGo()
+        }
       }
       standBtn.onclick = () => {
         this.player.Go = false
         this.dealerGo()
       }
-      
     }
-
 
     startGame() {
     // TEMPORARY - BACKLOG ADD A STARTING SCREEN WITH STORY?
       this.playerBet()
     }
-
 }
 
 // Event listener
 
 window.onload = () => {
+    audioLoop.volume = 0.1
+
     startBtn.onclick = () => {
       const newGame = new Game
       newGame.startGame();
