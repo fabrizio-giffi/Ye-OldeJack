@@ -2,8 +2,12 @@
 const audioLoop = document.querySelector("audio")
 const splashScreen = document.querySelector("#splash-screen")
 const startBtn = document.querySelector("#start-game-btn")
+const rulesBtn = document.querySelector("#rules-btn")
 
 const betScreen = document.querySelector("#bet-screen")
+const betInput = document.querySelector("#bet-input")
+const betOutput = document.querySelector("#bet-output")
+const betBtn = document.querySelector("#bet-btn")
 
 const gameScreen = document.querySelector("#game-screen")
 const hitBtn = document.querySelector("#hit")
@@ -40,12 +44,23 @@ const hiddenGame = document.querySelectorAll(".ctnHidden")
 const betMiddleAside = document.querySelector("#bet-middle-aside")
 const betMiddleImg = document.querySelector("#bet-middle-img")
 
-const playerBtn = document.querySelector("#btnHidden")
+const playerBtn = document.querySelector("#hit-stand")
 
 // Manipulating the dialog tag
 const dialog = document.querySelector("dialog")
 const dialogText = dialog.querySelector("p")
 const dialogBtn = dialog.querySelector("button")
+
+// Audio elements
+const soundFXdeal = new Audio("./media/card-dealing.mp3")
+const soundFXbtn = new Audio("./media/button-hover.mp3")
+const soundFXclick = new Audio("./media/button-click.mp3")
+const soundFXpaper = new Audio("./media/paper-folding.mp3")
+const soundFXcoins = new Audio("./media/coin-drop.mp3")
+const soundFXcard = new Audio("./media/one-card.mp3")
+const soundFXwinner = new Audio("./media/winner.mp3")
+const soundFXloser = new Audio("./media/loser.mp3")
+const soundFXtie = new Audio("./media/tie.mp3")
 
 // Full deck of cards - 52 cards - 4 Suits
 // Hearts, Diamons, Clubs, Spades
@@ -245,14 +260,13 @@ class Game {
       this.player.Bet = 0
       splashScreen.style.display = "none";
       betScreen.style.display = "flex"
+      betBtn.onmouseover = () => {
+        soundFXbtn.play()
+      }
       betMoneyPile.setAttribute("src", this.showMoney(this.player.Money))
       betMoneyAside.firstChild.innerText = "Your money: " + this.player.Money + "¢"
       betDealerPile.setAttribute("src", this.showMoney(this.dealer.Money))
       betDealerAside.firstChild.innerText = "Dealer's money: " + this.dealer.Money + "¢"
-
-      const betInput = document.querySelector("#bet-input")
-      const betOutput = document.querySelector("#bet-output")
-      const betBtn = document.querySelector("#bet-btn")
       
       if(this.player.Money < this.dealer.Money){
         betInput.setAttribute("max", this.player.Money)
@@ -268,6 +282,7 @@ class Game {
       })
       // Event listener to place the bet
       betBtn.onclick = () => {
+        soundFXcoins.play()
         this.player.Money -= betInput.value
         this.dealer.Money -= betInput.value
         this.player.Bet = betInput.value
@@ -278,7 +293,6 @@ class Game {
         moneyDealerImg.setAttribute("src", this.showMoney(this.dealer.Money))
         betScreen.style.display = "none"
         gameScreen.style.display = "flex"
-        playerBtn.style.display = "flex"
         this.oneRound()
       }
     }
@@ -305,7 +319,6 @@ class Game {
     }
     
     checkBlackjack() {
-
     // // Blackjack or "Natural" is checked only at the beginning of player's go.
     // // Although face down, we take into account dealer first card's value
     // // In case of Blackjack on any side, the face down card is revealed and so is dealer's score
@@ -315,6 +328,7 @@ class Game {
         dealerScoreAside.style.display = "flex"
         this.player.Money += Number(this.totalBet) + Number(this.player.Bet) / 2
         this.dealer.Money -= Number(this.player.Bet) / 2
+        soundFXwinner.play()
         betMiddleAside.parentNode.style.display = "none"
         dialog.style.display = "block"
         dialogText.innerText = 
@@ -326,11 +340,12 @@ You win ${Number(this.totalBet) + Number(this.player.Bet) / 2}!`
         firstCardImg.setAttribute("src", `${this.dealer.Hand[0].faceUp}`)
         dealerScoreAside.style.display = "flex"
         this.dealer.Money += Number(this.totalBet)
+        soundFXloser.play()
         betMiddleAside.parentNode.style.display = "none"
         dialog.style.display = "block"
         dialogText.innerText = 
 `Blackjack!
-Dealer takes the plate!`
+Dealer is the winner!`
         dialogBtn.innerText = "Noooo"
       }
       else if(this.showScore(this.player) === 21 && this.showScore(this.dealer) === 21) {
@@ -338,6 +353,7 @@ Dealer takes the plate!`
         dealerScoreAside.style.display = "flex"
         this.player.Money += Number(this.player.Bet)
         this.dealer.Money += Number(this.player.Bet)
+        soundFXtie.play()
         betMiddleAside.parentNode.style.display = "none"
         dialog.style.display = "block"
         dialogText.innerText =
@@ -348,7 +364,11 @@ Bets are returned.`
       }
 
     // The dialog button will run first the endRound function to reset everything to default
+      dialogBtn.onmouseover = () => {
+        soundFXbtn.play()
+      }
       dialogBtn.onclick = () => {
+        soundFXclick.play()
         dialog.style.display = "none"
         this.endRound()
         this.playerBet()
@@ -364,6 +384,7 @@ Bets are returned.`
     if (!this.checkBust(this.player) && !this.checkBust(this.dealer)){
       if(this.player.score > this.dealer.score) {
         this.player.Money += Number(this.totalBet)
+        soundFXwinner.play()
         betMiddleAside.parentNode.style.display = "none"
         dialog.style.display = "block"
         dialogText.innerText = 
@@ -373,16 +394,18 @@ You win ${this.totalBet}!`
         }
       else if(this.player.score < this.dealer.score) {
         this.dealer.Money += Number(this.totalBet)
+        soundFXloser.play()
         betMiddleAside.parentNode.style.display = "none"
         dialog.style.display = "block"
         dialogText.innerText = 
 `You lost!
-Dealer takes the plate!`
+Dealer collects his prize.`
         dialogBtn.innerText = "Damn."
         }
       else if(this.player.score === this.dealer.score) {
         this.player.Money += this.totalBet / 2
         this.dealer.Money += this.totalBet / 2
+        soundFXtie.play()
         betMiddleAside.parentNode.style.display = "none"
         dialog.style.display = "block"
         dialogText.innerText = 
@@ -395,20 +418,22 @@ Bets are returned.`
     // // There are three possibilities: only player bust, only dealer bust or double bust
     else if(!this.checkBust(this.player) && this.checkBust(this.dealer)) {
       this.player.Money += Number(this.totalBet)
+      soundFXwinner.play()
       betMiddleAside.parentNode.style.display = "none"
       dialog.style.display = "block"
       dialogText.innerText = 
-`Dealer is bust!
+`Dealer bust!
 You win ${this.totalBet}!`
         dialogBtn.innerText = "Cool!"
         }
     else if(this.checkBust(this.player) && !this.checkBust(this.dealer)) {
       this.dealer.Money += Number(this.totalBet)
+      soundFXloser.play()
       betMiddleAside.parentNode.style.display = "none"
       dialog.style.display = "block"
       dialogText.innerText = 
 `Bust!
-Dealer takes the plate!`
+Dealer collects his prize.`
         dialogBtn.innerText = "Damn."
         }
 
@@ -417,25 +442,28 @@ Dealer takes the plate!`
         else if(this.checkBust(this.player) && this.checkBust(this.dealer)) {
           if(this.player.score > this.dealer.score) {
             this.dealer.Money += Number(this.totalBet)
+            soundFXloser.play()
             betMiddleAside.parentNode.style.display = "none"
             dialog.style.display = "block"
             dialogText.innerText = 
   `Bust!
-  Dealer takes the plate!`
+  Dealer collects his prize.`
             dialogBtn.innerText = "Damn."
           }
           else if(this.player.score < this.dealer.score) {
             this.player.Money += Number(this.totalBet)
+            soundFXwinner.play()
             betMiddleAside.parentNode.style.display = "none"
             dialog.style.display = "block"
             dialogText.innerText = 
-  `Dealer is bust!
+  `Dealer bust!
   You win ${this.totalBet}!`
           dialogBtn.innerText = "Cool!"
           }
           else if(this.player.score === this.dealer.score) {
             this.player.Money += this.totalBet / 2
             this.dealer.Money += this.totalBet / 2
+            soundFXtie.play()
             betMiddleAside.parentNode.style.display = "none"
             dialog.style.display = "block"
             dialogText.innerText = 
@@ -447,7 +475,11 @@ Dealer takes the plate!`
 
     // // No matter the outcome, pressing the button on the dialog box would lead
     // // straight back to the betting screen for the next round to begin.
+        dialogBtn.onmouseover = () => {
+          soundFXbtn.play()
+        }
         dialogBtn.onclick = () => {
+          soundFXclick.play()
           dialog.style.display = "none"
           this.endRound()
           this.playerBet()
@@ -467,44 +499,59 @@ Dealer takes the plate!`
         this.checkWinner()
       }
 
-
     oneRound() {
       // // Taking variables back to default value for every new round
       this.player.Go = true
       this.player.canDraw = true
       this.dealer.canDraw = true
+      
+      // // The round will always start by dealing the first four cards
+      // // The setTimeouts are only meant as a way to simulate the dealing delay
       setTimeout(() => {
         this.drawCard(this.player)
+        soundFXdeal.play()
       }, 300);
       setTimeout(() => {
         this.drawCard(this.player)
         this.player.Go = false
-      }, 600);
+      }, 800);
       setTimeout(() => {
         this.drawCard(this.dealer)
-      }, 900);
-      setTimeout(() => {
-        this.drawCard(this.dealer)
-        this.player.Go = true
       }, 1200);
+      setTimeout(() => {
+        this.drawCard(this.dealer)
+        this.checkBlackjack()
+        this.player.Go = true
+      }, 1600);
       setTimeout(() => {
         hiddenGame.forEach(element => element.style.display = "flex" )
         moneyPlayerCtn.style.visibility = "visible"
         moneyDealerCtn.style.visibility = "visible"
+        playerBtn.style.display = "flex"
         betMiddleAside.firstChild.innerText = "Total bet: " + (Number(this.player.Bet) *2) + "¢"
         betMiddleImg.setAttribute("src", this.showMoney(this.totalBet))
-        this.checkBlackjack()
-      }, 1500);
+        
+      }, 2000);
 
       hitBtn.onclick = () => {
+        soundFXcard.play()
         this.drawCard(this.player);
         if(this.checkBust(this.player)) {
           this.dealerGo()
         }
       }
       standBtn.onclick = () => {
+        soundFXclick.play()
         this.player.Go = false
         this.dealerGo()
+      }
+
+      // // Mouseover sound FX
+      hitBtn.onmouseover = () => {
+        soundFXbtn.play()
+      }
+      standBtn.onmouseover = () => {
+        soundFXbtn.play()
       }
     }
 
@@ -518,8 +565,21 @@ Dealer takes the plate!`
 
 window.onload = () => {
     audioLoop.volume = 0.1
+    soundFXbtn.volume = 0.5
+
+    startBtn.onmouseover = () => {
+      soundFXbtn.play()
+    }
+
+    rulesBtn.onmouseover = () => {
+      soundFXbtn.play()
+    }
+    rulesBtn.onclick = () => {
+      soundFXpaper.play()
+    }
 
     startBtn.onclick = () => {
+      soundFXclick.play()
       const newGame = new Game
       newGame.startGame();
     };

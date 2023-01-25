@@ -87,7 +87,7 @@ aside, label, dialog {
 }
 
 #game-over-screen {
-    display: none;
+    display: none
 }
 
 #bet-money-aside {
@@ -125,7 +125,7 @@ aside, label, dialog {
     height: 40%;
 }
 
-#btnHidden {
+#hit-stand {
     display: none;
     width: 200px;
     gap: 10px;
