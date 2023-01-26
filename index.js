@@ -3,6 +3,11 @@ const audioLoop = document.querySelector("audio")
 const splashScreen = document.querySelector("#splash-screen")
 const startBtn = document.querySelector("#start-game-btn")
 const rulesBtn = document.querySelector("#rules-btn")
+const rulesScreen = document.querySelector("#rules-screen")
+const ruleOneCtn = document.querySelector("#rule-one-ctn")
+const ruleTwoCtn = document.querySelector("#rule-two-ctn")
+const nextPageBtn = document.querySelector("#next-page")
+const backSplashBtn = document.querySelector("#back-to-splash")
 
 const betScreen = document.querySelector("#bet-screen")
 const betInput = document.querySelector("#bet-input")
@@ -516,7 +521,7 @@ Dealer gets the prize.`
       firstCardImg.setAttribute("src", `${this.dealer.Hand[0].faceUp}`)
       dealerScoreAside.style.display = "flex"
 
-      while(this.showScore(this.dealer) <= 17) {
+      while(this.showScore(this.dealer) < 17) {
         this.drawCard(this.dealer)
         }
         this.checkWinner()
@@ -589,7 +594,7 @@ let newGame
 // Event listener
 
 window.onload = () => {
-    audioLoop.volume = 0.1
+    audioLoop.volume = 0.2
     soundFXbtn.volume = 0.5
 
     startBtn.onmouseover = () => {
@@ -601,6 +606,35 @@ window.onload = () => {
     }
     rulesBtn.onclick = () => {
       soundFXpaper.play()
+      splashScreen.style.display = "none"
+      rulesScreen.style.display = "flex"
+      ruleOneCtn.style.display = "block"
+    }
+
+    nextPageBtn.onmouseover = () => {
+      soundFXbtn.play()
+    }
+    nextPageBtn.onclick = () => {
+      soundFXpaper.play()
+      ruleOneCtn.style.transform = "rotate(-6deg)"
+      ruleOneCtn.style.right = "36%"
+      ruleOneCtn.style.bottom = "16%"
+      ruleTwoCtn.style.display = "block"
+      ruleOneCtn.style.opacity = "0.7"
+    }
+
+    backSplashBtn.onmouseover = () => {
+      soundFXbtn.play()
+    }
+    backSplashBtn.onclick = () => {
+      soundFXclick.play()
+      rulesScreen.style.display = "none"
+      ruleOneCtn.style.transform = "rotate(0deg)"
+      ruleOneCtn.style.bottom = "17%"
+      ruleOneCtn.style.right = "33%"
+      ruleTwoCtn.style.display = "none"
+      ruleOneCtn.style.opacity = "1"
+      splashScreen.style.display = "flex"
     }
 
     tryAgainBtn.onmouseover = () => {

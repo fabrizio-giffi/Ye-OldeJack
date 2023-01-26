@@ -33,12 +33,62 @@ audio {
     height: 400px;
 }
 
-#splash-screen img:first-of-type {
+.tavern-bkgr {
     position: absolute;
+    top: 0;
+    left: 0;
     z-index: -9;
     width: 100vw;
     height: 100vh;
     opacity: 0.4;
+}
+
+#rule-one-ctn {
+    position: absolute;
+    display: none;
+    bottom: 17%;
+    right: 33%;
+}
+
+#rule-two-ctn {
+    position: absolute;
+    display: none;
+    bottom: 17%;
+    right: 33%;
+    transform: rotate(-2deg);
+}
+
+#rule-two-ctn {
+    transform: rotate(1deg);
+}
+
+#rule-two-ctn {
+    z-index: 2;
+}
+
+#rules-screen {
+    display: none;
+}
+
+.rules {
+    margin-top: 20%;
+}
+
+#next-page, #back-to-splash {
+    z-index: 9;
+    box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.4);
+    position: relative;
+    width: 70px;
+}
+
+#next-page {
+    top: 240px;
+    right: 150px;
+}
+
+#back-to-splash {
+    top: 300px;
+    right: 180px;
 }
 
 .game-started {
@@ -148,7 +198,7 @@ aside, label, dialog {
     margin: 0;
 }
 
-#splash-screen .btn {
+.btn-splash {
     width: 30vw;
 }
 
