@@ -431,8 +431,8 @@ Dealer gets the prize.`
         dialogBtn.innerText = "Damn."
         }
       else if(this.player.score === this.dealer.score) {
-        this.player.Money += this.player.Bet
-        this.dealer.Money += this.player.Bet
+        this.player.Money += Number(this.player.Bet)
+        this.dealer.Money += Number(this.player.Bet)
         soundFXtie.play()
         betMiddleAside.parentNode.style.display = "none"
         dialog.style.display = "block"
@@ -489,8 +489,8 @@ Dealer gets the prize.`
           dialogBtn.innerText = "Cool!"
           }
           else if(this.player.score === this.dealer.score) {
-            this.player.Money += this.player.Bet
-            this.dealer.Money += this.player.Bet
+            this.player.Money += Number(this.player.Bet)
+            this.dealer.Money += Number(this.player.Bet)
             soundFXtie.play()
             betMiddleAside.parentNode.style.display = "none"
             dialog.style.display = "block"
