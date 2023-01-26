@@ -14,6 +14,8 @@ const hitBtn = document.querySelector("#hit")
 const standBtn = document.querySelector("#stand")
 
 const gameOverScreen = document.querySelector("#game-over-screen")
+const gameOverText = document.querySelector("#game-over-text")
+const gameOverImg = gameOverScreen.querySelector("img")
 
 const dealerHandUL = document.querySelector("#dealer-hand")
 const playerHandUL = document.querySelector("#player-hand")
@@ -46,10 +48,13 @@ const betMiddleImg = document.querySelector("#bet-middle-img")
 
 const playerBtn = document.querySelector("#hit-stand")
 
-// Manipulating the dialog tag
-const dialog = document.querySelector("dialog")
+// Manipulating the dialog tags
+const dialog = document.querySelector("#game-result")
 const dialogText = dialog.querySelector("p")
 const dialogBtn = dialog.querySelector("button")
+
+const tryAgainDialog = document.querySelector("#game-over-box")
+const tryAgainBtn = tryAgainDialog.querySelector("button")
 
 // Audio elements
 const soundFXdeal = new Audio("./media/card-dealing.mp3")
@@ -139,7 +144,7 @@ class Game {
   
       this.dealer = {
         Hand : [],
-        Money : 2500,
+        Money : 500,
         cardsCount: 0,
         canDraw : true,
         score : 0,
@@ -152,10 +157,10 @@ class Game {
 
     // // This function will sum the value of the cards in either hands and return it
     // // to be shown next to the player's and the dealer's hands
-    // // in case an ace would lead to busting, the alternative value is taken instead
+    // // Aces will count as 11 unless they lead to busting
     showScore(whoseGo) {
       whoseGo.score = whoseGo.Hand.reduce((acc, current) => {
-        if(current.value === 1 && acc + current.altValue > 21){
+        if(current.value === 1 && acc + current.altValue <= 21){
           return acc + current.altValue
         }
         else {
@@ -250,26 +255,27 @@ class Game {
     }
 
     gameOver() {
+      // // The game over function will manipulate the HTML items 
       gameScreen.style.display = "none"
       playerBtn.style.display = "none"
       betScreen.style.display = "none"
+      tryAgainDialog.style.display = "flex"
+      if(this.player.Money === 0) {
+        gameOverImg.setAttribute("src", "./images/assets/game-over-screen.jpg")
+        gameOverText.innerHTML = "You gambled all your money and lost it all.<br>Click the button below to try your luck one more time!"
+      }
+      else if (this.dealer.Money <= 0) {
+        gameOverImg.setAttribute("src", "./images/assets/game-victory.jpg")
+        gameOverText.innerHTML = "You did it! You beat the dealer!<br>Click the button below to play one more time!"
+      }
       hiddenGame.forEach(element => element.style.display = "none")
       gameOverScreen.style.display = "flex"
-    }
-    gameWon() {
-      gameScreen.style.display = "none"
-      playerBtn.style.display = "none"
-      betScreen.style.display = "none"
-      hiddenGame.forEach(element => element.style.display = "none")
-      gameOverScreen.style.display = "flex"
+
     }
     
     playerBet() {
-      if(this.player.Money === 0) {
+      if(this.player.Money === 0 || this.dealer.Money <= 0) {
         this.gameOver()
-      }
-      if(this.dealer.Money <= 0) {
-        this.gameWon()
       }
       this.player.Bet = 0
       splashScreen.style.display = "none";
@@ -340,14 +346,14 @@ class Game {
       if (this.showScore(this.player) === 21 && this.showScore(this.dealer) < 21) {
         firstCardImg.setAttribute("src", `${this.dealer.Hand[0].faceUp}`)
         dealerScoreAside.style.display = "flex"
-        this.player.Money += Number(this.totalBet) + Number(this.player.Bet) / 2
-        this.dealer.Money -= Number(this.player.Bet) / 2
+        this.player.Money += Number(this.totalBet) + Math.ceil((Number(this.player.Bet) / 2))
+        this.dealer.Money -= Math.floor((Number(this.player.Bet) / 2))
         soundFXwinner.play()
         betMiddleAside.parentNode.style.display = "none"
         dialog.style.display = "block"
         dialogText.innerText = 
 `Blackjack!
-You win ${Number(this.totalBet) + Number(this.player.Bet) / 2}!`
+You win ${Number(this.totalBet) + Math.ceil(Number(this.player.Bet) / 2)}!`
         dialogBtn.innerText = "Cool!"
       }
       else if(this.showScore(this.dealer) === 21 && this.showScore(this.player) < 21){
@@ -420,8 +426,8 @@ Dealer gets the prize.`
         dialogBtn.innerText = "Damn."
         }
       else if(this.player.score === this.dealer.score) {
-        this.player.Money += this.totalBet / 2
-        this.dealer.Money += this.totalBet / 2
+        this.player.Money += this.player.Bet
+        this.dealer.Money += this.player.Bet
         soundFXtie.play()
         betMiddleAside.parentNode.style.display = "none"
         dialog.style.display = "block"
@@ -478,8 +484,8 @@ Dealer gets the prize.`
           dialogBtn.innerText = "Cool!"
           }
           else if(this.player.score === this.dealer.score) {
-            this.player.Money += this.totalBet / 2
-            this.dealer.Money += this.totalBet / 2
+            this.player.Money += this.player.Bet
+            this.dealer.Money += this.player.Bet
             soundFXtie.play()
             betMiddleAside.parentNode.style.display = "none"
             dialog.style.display = "block"
@@ -578,6 +584,8 @@ Dealer gets the prize.`
     }
 }
 
+let newGame
+
 // Event listener
 
 window.onload = () => {
@@ -595,9 +603,21 @@ window.onload = () => {
       soundFXpaper.play()
     }
 
+    tryAgainBtn.onmouseover = () => {
+      soundFXbtn.play()
+    }
+
+    tryAgainBtn.onclick = () => {
+      gameOverScreen.style.display = "none"
+      betScreen.style.display = "none"
+      splashScreen.style.display = "flex"
+      soundFXclick.play()
+      newGame = new Game
+    }
+
     startBtn.onclick = () => {
       soundFXclick.play()
-      const newGame = new Game
+      newGame = new Game
       newGame.startGame();
     };
 }
