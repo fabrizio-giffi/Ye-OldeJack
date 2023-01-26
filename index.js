@@ -352,7 +352,7 @@ class Game {
         firstCardImg.setAttribute("src", `${this.dealer.Hand[0].faceUp}`)
         dealerScoreAside.style.display = "flex"
         this.player.Money += Number(this.totalBet) + Math.ceil((Number(this.player.Bet) / 2))
-        this.dealer.Money -= Math.floor((Number(this.player.Bet) / 2))
+        this.dealer.Money -= Math.ceil((Number(this.player.Bet) / 2))
         soundFXwinner.play()
         betMiddleAside.parentNode.style.display = "none"
         dialog.style.display = "block"
