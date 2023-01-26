@@ -357,7 +357,7 @@ class Game {
         betMiddleAside.parentNode.style.display = "none"
         dialog.style.display = "block"
         dialogText.innerText = 
-`Blackjack!
+`OldeJack!
 You win ${Number(this.totalBet) + Math.ceil(Number(this.player.Bet) / 2)}!`
         dialogBtn.innerText = "Cool!"
       }
@@ -369,7 +369,7 @@ You win ${Number(this.totalBet) + Math.ceil(Number(this.player.Bet) / 2)}!`
         betMiddleAside.parentNode.style.display = "none"
         dialog.style.display = "block"
         dialogText.innerText = 
-`Blackjack!
+`OldeJack!
 Dealer is the winner!`
         dialogBtn.innerText = "Noooo"
       }
@@ -383,7 +383,7 @@ Dealer is the winner!`
         dialog.style.display = "block"
         dialogText.innerText =
 `What are the odds!
-A Blackjack tie!
+An OldeJack tie!
 Bets are returned.`
         dialogBtn.innerText = "¯\_(ツ)_/¯"
       }
