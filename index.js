@@ -651,6 +651,7 @@ window.onload = () => {
 
     startBtn.onclick = () => {
       soundFXclick.play()
+      audioLoop.play()
       newGame = new Game
       newGame.startGame();
     };
