@@ -72,7 +72,7 @@ aside, label, dialog {
 
 .money-display {
     position: relative;
-    width: 90px;
+    max-width: 100px;
 }
 
 #game-screen .ctnHidden {

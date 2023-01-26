@@ -68,7 +68,7 @@ const soundFXtie = new Audio("./media/tie.mp3")
 class Game {
   constructor() {
     this.cardsDeck = [
-      {name: "Ace of Hearts", value: 11, altValue: 1, faceUp: "./images/playing-cards/card-hearts-1.png", faceDown: "./images/playing-cards/card-back1.png"},
+      {name: "Ace of Hearts", value: 1, altValue: 11, faceUp: "./images/playing-cards/card-hearts-1.png", faceDown: "./images/playing-cards/card-back1.png"},
       {name: "Two of Hearts", value: 2, faceUp: "./images/playing-cards/card-hearts-2.png", faceDown: "./images/playing-cards/card-back1.png"},
       {name: "Three of Hearts", value: 3, faceUp: "./images/playing-cards/card-hearts-3.png", faceDown: "./images/playing-cards/card-back1.png"},
       {name: "Four of Hearts", value: 4, faceUp: "./images/playing-cards/card-hearts-4.png", faceDown: "./images/playing-cards/card-back1.png"},
@@ -81,7 +81,7 @@ class Game {
       {name: "Jack of Hearts", value: 10, faceUp: "./images/playing-cards/card-hearts-11.png", faceDown: "./images/playing-cards/card-back1.png"},
       {name: "Queen of Hearts", value: 10, faceUp: "./images/playing-cards/card-hearts-12.png", faceDown: "./images/playing-cards/card-back1.png"},
       {name: "King of Hearts", value: 10, faceUp: "./images/playing-cards/card-hearts-13.png", faceDown: "./images/playing-cards/card-back1.png"},
-      {name: "Ace of Diamonds", value: 11, altValue: 1, faceUp: "./images/playing-cards/card-diamonds-1.png", faceDown: "./images/playing-cards/card-back1.png"},
+      {name: "Ace of Diamonds", value: 1, altValue: 11, faceUp: "./images/playing-cards/card-diamonds-1.png", faceDown: "./images/playing-cards/card-back1.png"},
       {name: "Two of Diamonds", value: 2, faceUp: "./images/playing-cards/card-diamonds-2.png", faceDown: "./images/playing-cards/card-back1.png"},
       {name: "Three of Diamonds", value: 3, faceUp: "./images/playing-cards/card-diamonds-3.png", faceDown: "./images/playing-cards/card-back1.png"},
       {name: "Four of Diamonds", value: 4, faceUp: "./images/playing-cards/card-diamonds-4.png", faceDown: "./images/playing-cards/card-back1.png"},
@@ -94,7 +94,7 @@ class Game {
       {name: "Jack of Diamonds", value: 10, faceUp: "./images/playing-cards/card-diamonds-11.png", faceDown: "./images/playing-cards/card-back1.png"},
       {name: "Queen of Diamonds", value: 10, faceUp: "./images/playing-cards/card-diamonds-12.png", faceDown: "./images/playing-cards/card-back1.png"},
       {name: "King of Diamonds", value: 10, faceUp: "./images/playing-cards/card-diamonds-13.png", faceDown: "./images/playing-cards/card-back1.png"},
-      {name: "Ace of Clubs", value: 11, altValue: 1, faceUp: "./images/playing-cards/card-clubs-1.png", faceDown: "./images/playing-cards/card-back1.png"},
+      {name: "Ace of Clubs", value: 1, altValue: 11, faceUp: "./images/playing-cards/card-clubs-1.png", faceDown: "./images/playing-cards/card-back1.png"},
       {name: "Two of Clubs", value: 2, faceUp: "./images/playing-cards/card-clubs-2.png", faceDown: "./images/playing-cards/card-back1.png"},
       {name: "Three of Clubs", value: 3, faceUp: "./images/playing-cards/card-clubs-3.png", faceDown: "./images/playing-cards/card-back1.png"},
       {name: "Four of Clubs", value: 4, faceUp: "./images/playing-cards/card-clubs-4.png", faceDown: "./images/playing-cards/card-back1.png"},
@@ -107,7 +107,7 @@ class Game {
       {name: "Jack of Clubs", value: 10, faceUp: "./images/playing-cards/card-clubs-11.png", faceDown: "./images/playing-cards/card-back1.png"},
       {name: "Queen of Clubs", value: 10, faceUp: "./images/playing-cards/card-clubs-12.png", faceDown: "./images/playing-cards/card-back1.png"},
       {name: "King of Clubs", value: 10, faceUp: "./images/playing-cards/card-clubs-13.png", faceDown: "./images/playing-cards/card-back1.png"},
-      {name: "Ace of Spades", value: 11, altValue: 1, faceUp: "./images/playing-cards/card-spades-1.png", faceDown: "./images/playing-cards/card-back1.png"},
+      {name: "Ace of Spades", value: 1, altValue: 11, faceUp: "./images/playing-cards/card-spades-1.png", faceDown: "./images/playing-cards/card-back1.png"},
       {name: "Two of Spades", value: 2, faceUp: "./images/playing-cards/card-spades-2.png", faceDown: "./images/playing-cards/card-back1.png"},
       {name: "Three of Spades", value: 3, faceUp: "./images/playing-cards/card-spades-3.png", faceDown: "./images/playing-cards/card-back1.png"},
       {name: "Four of Spades", value: 4, faceUp: "./images/playing-cards/card-spades-4.png", faceDown: "./images/playing-cards/card-back1.png"},
@@ -152,8 +152,17 @@ class Game {
 
     // // This function will sum the value of the cards in either hands and return it
     // // to be shown next to the player's and the dealer's hands
+    // // in case an ace would lead to busting, the alternative value is taken instead
     showScore(whoseGo) {
-      whoseGo.score = whoseGo.Hand.reduce((acc, current) => acc + current.value, 0)
+      whoseGo.score = whoseGo.Hand.reduce((acc, current) => {
+        if(current.value === 1 && acc + current.altValue > 21){
+          return acc + current.altValue
+        }
+        else {
+          return acc + current.value
+        }
+      }, 0)
+
       if (whoseGo.score <= 21) {
         return whoseGo.score
       }
@@ -165,20 +174,25 @@ class Game {
     // // This function takes either player's or bet total money and displays
     // // a pile of coin accordingly.
     showMoney(money) {
-      if(money > 200) {
+
+      if(money > 2000) {
+        this.moneyDisplay = 3000;
+      } else if(money <= 2000 && money > 1000) {
+        this.moneyDisplay = 2000;
+      } else if (money <= 1000 && money > 500) {
+        this.moneyDisplay = 1000;
+      } else if(money <= 500 && money > 200) {
         this.moneyDisplay = 500;
-      }
-      else if (money <= 200 && money > 50) {
+      } else if (money <= 200 && money > 50) {
         this.moneyDisplay = 200;
-      }
-      else if (money <= 50 && money > 20) {
+      } else if (money <= 50 && money > 20) {
         this.moneyDisplay = 50;
-      }
-      else if (money <= 20 && money > 10) {
+      } else if (money <= 20 && money > 10) {
         this.moneyDisplay = 20;
-      }
-      else {
+      } else if (money <= 10 && money > 0) {
         this.moneyDisplay = 10
+      } else {
+        this.moneyDisplay = 0
       }
       return "./images/assets/"+this.moneyDisplay+".png"
     }
@@ -376,6 +390,9 @@ Bets are returned.`
     }
 
     checkWinner() {
+    // // We hide the stand and hit buttons
+    playerBtn.style.display = "none"
+
     // // The checkWinner function will run at the end of dealer's go 
     // // with a delay of 1500ms to make user experience better.
       setTimeout(() => {
@@ -399,7 +416,7 @@ You win ${this.totalBet}!`
         dialog.style.display = "block"
         dialogText.innerText = 
 `You lost!
-Dealer collects his prize.`
+Dealer gets the prize.`
         dialogBtn.innerText = "Damn."
         }
       else if(this.player.score === this.dealer.score) {
@@ -433,7 +450,7 @@ You win ${this.totalBet}!`
       dialog.style.display = "block"
       dialogText.innerText = 
 `Bust!
-Dealer collects his prize.`
+Dealer gets the prize.`
         dialogBtn.innerText = "Damn."
         }
 
@@ -447,7 +464,7 @@ Dealer collects his prize.`
             dialog.style.display = "block"
             dialogText.innerText = 
   `Bust!
-  Dealer collects his prize.`
+  Dealer gets the prize.`
             dialogBtn.innerText = "Damn."
           }
           else if(this.player.score < this.dealer.score) {
