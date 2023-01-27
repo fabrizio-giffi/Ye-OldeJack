@@ -344,12 +344,14 @@ class Game {
     }
     
     checkBlackjack() {
-    // // Blackjack or "Natural" is checked only at the beginning of player's go.
-    // // Although face down, we take into account dealer first card's value
-    // // In case of Blackjack on any side, the face down card is revealed and so is dealer's score
+      // // Blackjack or "Natural" is checked only at the beginning of player's go.
+      // // Although face down, we take into account dealer first card's value
+      // // In case of Blackjack on any side, the face down card is revealed and so is dealer's score
+      playerBtn.style.display = "none"
       const firstCardImg = document.querySelector("#face-down")
       if (this.showScore(this.player) === 21 && this.showScore(this.dealer) < 21) {
         firstCardImg.setAttribute("src", `${this.dealer.Hand[0].faceUp}`)
+        playerScoreAside.style.display = "flex"
         dealerScoreAside.style.display = "flex"
         this.player.Money += Number(this.totalBet) + Math.ceil((Number(this.player.Bet) / 2))
         this.dealer.Money -= Math.ceil((Number(this.player.Bet) / 2))
@@ -363,6 +365,7 @@ You win ${Number(this.totalBet) + Math.ceil(Number(this.player.Bet) / 2)}!`
       }
       else if(this.showScore(this.dealer) === 21 && this.showScore(this.player) < 21){
         firstCardImg.setAttribute("src", `${this.dealer.Hand[0].faceUp}`)
+        playerScoreAside.style.display = "flex"
         dealerScoreAside.style.display = "flex"
         this.dealer.Money += Number(this.totalBet)
         soundFXloser.play()
@@ -375,6 +378,7 @@ Dealer is the winner!`
       }
       else if(this.showScore(this.player) === 21 && this.showScore(this.dealer) === 21) {
         firstCardImg.setAttribute("src", `${this.dealer.Hand[0].faceUp}`)
+        playerScoreAside.style.display = "flex"
         dealerScoreAside.style.display = "flex"
         this.player.Money += Number(this.player.Bet)
         this.dealer.Money += Number(this.player.Bet)
@@ -386,6 +390,14 @@ Dealer is the winner!`
 An OldeJack tie!
 Bets are returned.`
         dialogBtn.innerText = "¯\_(ツ)_/¯"
+      }
+      else {
+        hiddenGame.forEach(element => element.style.display = "flex" )
+        moneyPlayerCtn.style.visibility = "visible"
+        moneyDealerCtn.style.visibility = "visible"
+        betMiddleAside.firstChild.innerText = "Total bet: " + (Number(this.player.Bet) *2) + "¢"
+        betMiddleImg.setAttribute("src", this.showMoney(this.totalBet))
+        playerBtn.style.display = "flex"
       }
 
     // The dialog button will run first the endRound function to reset everything to default
@@ -548,17 +560,10 @@ Dealer gets the prize.`
       }, 1200);
       setTimeout(() => {
         this.drawCard(this.dealer)
-        this.checkBlackjack()
         this.player.Go = true
       }, 1600);
       setTimeout(() => {
-        hiddenGame.forEach(element => element.style.display = "flex" )
-        moneyPlayerCtn.style.visibility = "visible"
-        moneyDealerCtn.style.visibility = "visible"
-        playerBtn.style.display = "flex"
-        betMiddleAside.firstChild.innerText = "Total bet: " + (Number(this.player.Bet) *2) + "¢"
-        betMiddleImg.setAttribute("src", this.showMoney(this.totalBet))
-        
+        this.checkBlackjack()
       }, 2000);
 
       hitBtn.onclick = () => {
