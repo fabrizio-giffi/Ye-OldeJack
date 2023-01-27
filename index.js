@@ -149,7 +149,7 @@ class Game {
   
       this.dealer = {
         Hand : [],
-        Money : 500,
+        Money : 2500,
         cardsCount: 0,
         canDraw : true,
         score : 0,
